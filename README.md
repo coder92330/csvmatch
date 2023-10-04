@@ -3,8 +3,6 @@ CSV Match
 
 Find (fuzzy) matches between two CSV files in the terminal.
 
-[There's a tutorial on how CSV Match can be used for investigative journalism here.](https://github.com/maxharlow/tutorials/tree/master/find-connections-with-fuzzy-matching)
-
 
 Installing
 ----------
@@ -79,84 +77,4 @@ We can combine some of the above options to perform operations alike Excel's `VL
         --output 2* 1.codename \
         > results.csv
 
-### Fuzzy matching
 
-CSV Match also supports fuzzy matching. This can be combined with any of the above options.
-
-#### Bilenko
-
-The default fuzzy mode makes use of the [Dedupe library](https://github.com/dedupeio/dedupe) built by Forest Gregg and Derek Eder based on the work of Mikhail Bilenko. This algorithm asks you to give a number of examples of records from each dataset that are the same -- this information is extrapolated to link the rest of the dataset.
-
-    $ csvmatch data1.csv data2.csv --fuzzy
-
-The more examples you give it, the better the results will be. At minimum, you should try to provide 10 positive matches and 10 negative matches.
-
-#### Levenshtein
-
-[Damerau-Levenshtein](https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance) is a string distance metric which counts the number of changes that would have to be made to transform one string into another.
-
-For two strings to be considered a match, we require 60% of the longer string to be the same as the shorter one. This threshold can be modified by passing a number between 0.0 and 1.0 with `-r`.
-
-    $ csvmatch data1.csv data2.csv --fuzzy levenshtein
-
-    name,Person Name
-    George Smiley,George SMILEY
-    Toby Esterhase,Tony Esterhase
-    Peter Guillam,Peter Guillam
-
-Here this matches Toby Esterhase and Tony Esterhase -- Levenshtein is good at picking up typos and other small differences in spelling.
-
-### Jaro
-
-[Jaro-Winkler](https://en.wikipedia.org/wiki/Jaro–Winkler_distance) is a string distance metric which counts the number of transpositions that would be required to transform one string into another. It tends to work better than Levenshtein for shorter strings of text.
-
-    $ csvmatch data1.csv data2.csv --fuzzy jaro
-
-    name,Person Name
-    George Smiley,George SMILEY
-    Percy Alléline,Peter Guillam
-    Percy Alléline,Sam Collins
-    Toby Esterhase,Tony Esterhase
-    Peter Guíllam,Peter Guillam
-    Connie Sachs,Konny Saks
-
-Here we can see a couple of incorrect matches for Percy Alléline, but Connie Sachs has matched.
-
-#### Metaphone
-
-[Double Metaphone](https://en.wikipedia.org/wiki/Metaphone#Double_Metaphone) is a phonetic matching algorithm, which compares strings based on how they are pronounced:
-
-    $ csvmatch data1.csv data2.csv --fuzzy metaphone
-
-    name,Person Name
-    George Smiley,George SMILEY
-    Peter Guillam,Peter Guillam
-    Connie Sachs,Konny Saks
-
-This shows a match for Connie Sachs and Konny Saks, despite their very different spellings.
-
-
-Common installation problems
-----------------------------
-
-### `No module named 'numpy'`
-
-If you're on a Mac, this could mean you need to install the Xcode command line developer tools. These can be installed by:
-
-    $ xcode-select --install
-
-Then click install on the prompt that appears. After it's finished, try installing CSV Match again.
-
-### `Broken toolchain: cannot link a simple C program`
-
-If you're on a Mac, this could mean you need to accept the Xcode licence. To do this:
-
-    $ sudo xcodebuild -license accept
-
-You'll be asked for your password. After it's finished, try installing CSV Match again.
-
-
-A note on uniqueness
---------------------
-
-Both with exact matches and fuzzy matching a name being the same is [no guarantee](https://en.wikipedia.org/wiki/List_of_most_popular_given_names) it refers to the same person. But the inverse is also true -- even with CSV Match, a combination of first inital and last name is likely to be sufficiently different from forename, middle names, and surname together that a match is unlikely. Moreso if one name includes a typo, either accidential or deliberate.
